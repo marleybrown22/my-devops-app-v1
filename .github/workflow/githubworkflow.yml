@@ -27,3 +27,45 @@ jobs:
     - run: npm ci
     - run: npm run build --if-present
     - run: npm test
+
+
+  lint:
+  
+    runs-on: ubuntu-latest
+
+    steps:
+     uses: actions/checkout@v4
+
+   - name: Lint Node.js CI
+        uses: github/super-linter@v4
+        env:
+          VALIDATE_ALL_CODEBASE: false
+          DEFAULT_BRANCH: "master"
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  Test:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - uses: actions/checkout@v4
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    - run: npm ci
+    - run: npm run build --if-present
+    - run: npm test
+
+  Docker Image:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Build the Docker image
+      run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
