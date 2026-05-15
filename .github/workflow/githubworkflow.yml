@@ -9,9 +9,7 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
     strategy:
       matrix:
         node-version: [20.1.0]
@@ -28,15 +26,11 @@ jobs:
     - run: npm run build --if-present
     - run: npm test
 
-
   lint:
-  
     runs-on: ubuntu-latest
-
     steps:
-     uses: actions/checkout@v4
-
-   - name: Lint Node.js CI
+      - uses: actions/checkout@v4
+      - name: Lint Node.js CI
         uses: github/super-linter@v4
         env:
           VALIDATE_ALL_CODEBASE: false
@@ -44,28 +38,20 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   Test:
-
     runs-on: ubuntu-latest
-
     steps:
-
-    - uses: actions/checkout@v4
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-    - run: npm ci
-    - run: npm run build --if-present
-    - run: npm test
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run build --if-present
+      - run: npm test
 
   Docker Image:
-
     runs-on: ubuntu-latest
-
     steps:
-
-    steps:
-    - uses: actions/checkout@v4
-    - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
+      - uses: actions/checkout@v4
+      - name: Build the Docker image
+        run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
