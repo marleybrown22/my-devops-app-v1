@@ -10,6 +10,10 @@ app.get('/', (req, res) => {
   res.send('My third big test!')
 })
 
+app.get('/change', (req, res) => {
+  res.send('New deployment test!')
+})
+
 app.listen(port, () => {
   console.log(`Example app listening is port ${port}`)
 })
