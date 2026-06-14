@@ -1,24 +1,27 @@
-name: CD - Deploy to AWS EC2
+name: Deploy to EC2
 
 on:
   push:
-    branches:
-      - main
+    branches: [ "master" ]
 
 jobs:
   deploy:
-    name: Deploy to EC2
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USERNAME }}
-          key: ${{ secrets.EC2_PRIVATE_KEY }}
-          script: |
-            sh /home/ec2-user/deploy.sh
+    - name: Copy SSH key
+      run: |
+        echo "${{ secrets.EC2_KEY }}" > key.pem
+        chmod 600 key.pem
+
+    - name: Deploy to EC2
+      run: |
+        ssh -o StrictHostKeyChecking=no -i key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+          cd ${{ secrets.EC2_PATH }}
+          git pull
+          npm install --production
+          pm2 restart all
+        EOF
