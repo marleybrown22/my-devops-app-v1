@@ -66,8 +66,8 @@ jobs:
     name: Deploy to EC2
     runs-on: ubuntu-latest
     needs: build
+    # Deploy on pushes to main or manual runs — never on pull requests.
     if: github.ref == 'refs/heads/master' && github.event_name != 'pull_request'
-
     steps:
       - name: Redeploy over SSH
         uses: appleboy/ssh-action@v1.2.0
@@ -78,31 +78,14 @@ jobs:
           script_stop: true
           script: |
             set -euo pipefail
-
-            # Go to app directory
             cd /opt/app
-
-            # Pull latest code from master
             sudo git fetch --depth 1 origin master
             sudo git reset --hard origin/master
-
-            # Install dependencies (non-docker part from your first workflow)
-            npm install --production || true
-
-            # Build Docker image
             sudo docker build -t my-devops-app:latest .
-
-            # Stop old container if running
             sudo docker rm -f my-devops-app 2>/dev/null || true
-
-            # Start new container
             sudo docker run -d --name my-devops-app --restart=always \
               -p 3000:3000 my-devops-app:latest
-
-            # Clean old images
             sudo docker image prune -f
-
-            # Health check
             echo "Waiting for health check..."
             for i in $(seq 1 10); do
               if curl -fsS http://localhost:3000/health; then
@@ -111,6 +94,6 @@ jobs:
               fi
               sleep 3
             done
-
             echo "Health check failed after deploy" >&2
             exit 1
+
