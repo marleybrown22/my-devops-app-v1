@@ -96,4 +96,3 @@ jobs:
             done
             echo "Health check failed after deploy" >&2
             exit 1
-
