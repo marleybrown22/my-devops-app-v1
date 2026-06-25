@@ -121,6 +121,16 @@ jobs:
             fi
             sudo docker build -t my-devops-app:latest .
             sudo docker rm -f my-devops-app 2>/dev/null || true
+            port_containers="$(sudo docker ps -aq --filter "publish=3000")"
+            if [ -n "$port_containers" ]; then
+              echo "Removing existing Docker container(s) publishing port 3000..."
+              sudo docker rm -f $port_containers
+            fi
+            if command -v ss >/dev/null 2>&1 && ss -ltn "( sport = :3000 )" | grep -q ':3000'; then
+              echo "Port 3000 is still in use by a non-Docker process:" >&2
+              ss -ltnp "( sport = :3000 )" >&2 || true
+              exit 1
+            fi
             sudo docker run -d --name my-devops-app --restart=always \
               -p 3000:3000 my-devops-app:latest
             sudo docker image prune -f
