@@ -62,10 +62,6 @@ jobs:
           ignore-unfixed: true
           vuln-type: 'os,library'
 
-      - name: Debug secret length
-        run: |
-        echo "Key length: $(echo '${{ secrets.EC2_SSH_KEY }}' | wc -c)"
-
   deploy:
     name: Deploy to EC2
     runs-on: ubuntu-latest
