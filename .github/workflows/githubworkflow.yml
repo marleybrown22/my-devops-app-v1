@@ -66,7 +66,7 @@ jobs:
     name: Deploy to EC2
     runs-on: ubuntu-latest
     needs: build
-    # Deploy on pushes to main or manual runs — never on pull requests.
+    # Deploy on pushes to master or manual runs; never on pull requests.
     if: github.ref == 'refs/heads/master' && github.event_name != 'pull_request'
     steps:
       - name: Redeploy over SSH
@@ -86,6 +86,10 @@ jobs:
             sudo git reset --hard origin/master
             if ! command -v docker >/dev/null 2>&1; then
               echo "Docker not found, installing..."
+              if [ -r /etc/os-release ]; then
+                . /etc/os-release
+                echo "Remote OS: ${PRETTY_NAME:-unknown}"
+              fi
               if command -v apt-get >/dev/null 2>&1; then
                 sudo apt-get update
                 sudo apt-get install -y docker.io
@@ -93,6 +97,8 @@ jobs:
                 sudo yum install -y docker
               elif command -v dnf >/dev/null 2>&1; then
                 sudo dnf install -y docker
+              elif command -v apk >/dev/null 2>&1; then
+                sudo apk add --no-cache docker
               elif command -v zypper >/dev/null 2>&1; then
                 sudo zypper install -y docker
               elif command -v curl >/dev/null 2>&1; then
@@ -103,7 +109,15 @@ jobs:
                 echo "No supported package manager or installer available for Docker." >&2
                 exit 1
               fi
-              sudo systemctl enable --now docker || true
+              if command -v systemctl >/dev/null 2>&1; then
+                sudo systemctl enable --now docker || sudo systemctl start docker || true
+              elif command -v service >/dev/null 2>&1; then
+                sudo service docker start || true
+              fi
+              if ! command -v docker >/dev/null 2>&1; then
+                echo "Docker installation did not put docker on PATH." >&2
+                exit 1
+              fi
             fi
             sudo docker build -t my-devops-app:latest .
             sudo docker rm -f my-devops-app 2>/dev/null || true
