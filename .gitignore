@@ -7,6 +7,9 @@ npm-debug.log*
 
 .env.*
 
+*.pem
+*.key
+
  
 
 .DS_Store
