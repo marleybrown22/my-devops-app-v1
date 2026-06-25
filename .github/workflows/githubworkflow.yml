@@ -85,10 +85,25 @@ jobs:
             sudo git fetch --depth 1 origin master
             sudo git reset --hard origin/master
             if ! command -v docker >/dev/null 2>&1; then
-              echo "Docker not found, installing docker.io..."
-              sudo apt-get update
-              sudo apt-get install -y docker.io
-              sudo systemctl enable --now docker
+              echo "Docker not found, installing..."
+              if command -v apt-get >/dev/null 2>&1; then
+                sudo apt-get update
+                sudo apt-get install -y docker.io
+              elif command -v yum >/dev/null 2>&1; then
+                sudo yum install -y docker
+              elif command -v dnf >/dev/null 2>&1; then
+                sudo dnf install -y docker
+              elif command -v zypper >/dev/null 2>&1; then
+                sudo zypper install -y docker
+              elif command -v curl >/dev/null 2>&1; then
+                curl -fsSL https://get.docker.com | sudo sh
+              elif command -v wget >/dev/null 2>&1; then
+                sudo wget -qO- https://get.docker.com | sudo sh
+              else
+                echo "No supported package manager or installer available for Docker." >&2
+                exit 1
+              fi
+              sudo systemctl enable --now docker || true
             fi
             sudo docker build -t my-devops-app:latest .
             sudo docker rm -f my-devops-app 2>/dev/null || true
