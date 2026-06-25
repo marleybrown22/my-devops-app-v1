@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "test": "echo \"Error: no test specified yet\"",
-    "lint": "echo \"Error: no test yet\"",
+    "test": "node --check index.js",
+    "lint": "node --check index.js",
     "build": "echo \"Error: no build step\""
   },
   "keywords": [],
@@ -14,6 +14,7 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "@types/node": "^25.6.2"
+    "@types/node": "^25.6.2",
+    "express": "^5.2.1"
   }
 }
