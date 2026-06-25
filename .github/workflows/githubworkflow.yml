@@ -72,7 +72,7 @@ jobs:
       - name: Redeploy over SSH
         uses: appleboy/ssh-action@v1.2.5
         with:
-          host: 100.54.41.85
+          host: 54.147.0.46
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
