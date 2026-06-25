@@ -121,14 +121,22 @@ jobs:
             fi
             sudo docker build -t my-devops-app:latest .
             sudo docker rm -f my-devops-app 2>/dev/null || true
-            port_containers="$(sudo docker ps -aq --filter "publish=3000")"
+            echo "Docker containers before starting replacement:"
+            sudo docker ps -a --format 'table {{.ID}}\t{{.Names}}\t{{.Status}}\t{{.Ports}}'
+            port_containers="$(sudo docker ps -a --format '{{.ID}} {{.Ports}}' | awk '$0 ~ /(^|[,:])3000->|0\.0\.0\.0:3000->|\[::\]:3000->|:::3000->/ { print $1 }')"
             if [ -n "$port_containers" ]; then
               echo "Removing existing Docker container(s) publishing port 3000..."
               sudo docker rm -f $port_containers
             fi
-            if command -v ss >/dev/null 2>&1 && ss -ltn "( sport = :3000 )" | grep -q ':3000'; then
-              echo "Port 3000 is still in use by a non-Docker process:" >&2
-              ss -ltnp "( sport = :3000 )" >&2 || true
+            port_listener=""
+            if command -v ss >/dev/null 2>&1; then
+              port_listener="$(sudo ss -ltnp | awk '$4 ~ /:3000$/')"
+            elif command -v netstat >/dev/null 2>&1; then
+              port_listener="$(sudo netstat -ltnp 2>/dev/null | awk '$4 ~ /:3000$/')"
+            fi
+            if [ -n "$port_listener" ]; then
+              echo "Port 3000 is still in use before starting the app:" >&2
+              echo "$port_listener" >&2
               exit 1
             fi
             sudo docker run -d --name my-devops-app --restart=always \
