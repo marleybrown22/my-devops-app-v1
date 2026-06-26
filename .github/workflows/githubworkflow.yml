@@ -73,16 +73,16 @@ jobs:
 
       - name: Prepare repository SSH key
         run: |
-          test -s brown_key.pem
-          chmod 600 brown_key.pem
+          test -s marley-key.pem
+          chmod 600 marley-key.pem
 
       - name: Redeploy over SSH
         uses: appleboy/ssh-action@v1.2.5
         with:
-          host: 100.54.41.85
+          host: 52.87.224.246
           port: 22
           username: ${{ secrets.EC2_USER }}
-          key_path: ${{ github.workspace }}/brown_key.pem
+          key_path: ${{ github.workspace }}/marley-key.pem
           script: |
             set -euo pipefail
             sudo mkdir -p /opt/app
