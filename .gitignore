@@ -27,7 +27,7 @@ coverage
  
 # Terraform
 
-terraform/
+terraform/.terraform/
 
 *.tfstate
 

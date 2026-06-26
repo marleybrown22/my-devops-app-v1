@@ -82,14 +82,15 @@ jobs:
           printf '%s\n' "$SSH_PRIVATE_KEY" > marley-key.pem
           test -s marley-key.pem
           chmod 600 marley-key.pem
+          ssh-keygen -lf marley-key.pem
 
       - name: Redeploy over SSH
         uses: appleboy/ssh-action@v1.2.5
         with:
           host: 52.87.224.246
           port: 22
-          username: ${{ secrets.EC2_USER }}
-          key_path: ${{ github.workspace }}/marley-key.pem
+          username: ec2-user
+          key: ${{ secrets.EC2_SSH_KEY || secrets.EC2_KEY }}
           script: |
             set -euo pipefail
             sudo mkdir -p /opt/app
