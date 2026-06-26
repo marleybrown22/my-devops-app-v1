@@ -71,8 +71,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Prepare repository SSH key
+      - name: Prepare SSH key
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY || secrets.EC2_KEY }}
         run: |
+          if [ -z "$SSH_PRIVATE_KEY" ]; then
+            echo "Missing SSH private key secret. Set EC2_SSH_KEY in GitHub repository secrets." >&2
+            exit 1
+          fi
+          printf '%s\n' "$SSH_PRIVATE_KEY" > marley-key.pem
           test -s marley-key.pem
           chmod 600 marley-key.pem
 
